@@ -10,19 +10,17 @@ import glob
 class Application():
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title(u"メール自動送信")
+        self.root.title(u"Image2PDF")
         self.root.geometry("700x500")
-        self.data = {'smpt_host': 'smtp.office365.com', 'smpt_port': 587, 'from': '',
-                     'pass': '', 'username': 'gbs54850@nuc.kwansei.ac.jp', 'content': '', 'csv_path': ''}
-        self.files = glob.glob('tmp/png/*')
+        self.files = glob.glob('input/png/*')
         self.MainMenu()
 
     def MainMenu(self):
       print(self.files)
-      lbl_port = tk.Label(text='保存ファイル名')
-      lbl_port.grid(row=0, column=0)
-      self.txt_subject = tk.Entry(width=30)
-      self.txt_subject.grid(row=0, column=1, pady=10)
+      lbl_savename = tk.Label(text='保存ファイル名')
+      lbl_savename.grid(row=0, column=0)
+      self.txt_savename= tk.Entry(width=30)
+      self.txt_savename.grid(row=0, column=1, pady=10)
       #self.txt_port.insert(0, self.data['subject'])
       self.dir_list = tk.StringVar(self.root, value=self.files)
       self.list_box = tk.Listbox(self.root, listvariable=self.dir_list, width=50)
@@ -67,17 +65,21 @@ class Application():
         self.list_box.select_set(n+1)
 
     def FolderSelect(self):
-        self.dir_name = tk.filedialog.askdirectory() + "/*"
-        print(self.files)
+        self.dir_name = (tk.filedialog.askdirectory() + "/*").replace('/', os.sep)
         self.files = glob.glob(self.dir_name)
+        print(self.files)
         self.dir_list.set(self.files)
 
     def Run(self):
-      pdf_FileName = "tmp/pdf/output.pdf" # 出力するPDFの名前
+      pdf_dir_path = "pdf/".replace('/', os.sep) # 出力するPDFのディレクトリ名
+      os.makedirs(pdf_dir_path, exist_ok=True)
       png_Folder = self.files
+      self.filename = self.txt_savename.get()
       extension  = ".png" # 拡張子がPNGのものを対象
+      
+      pdf_path = pdf_dir_path + self.filename
 
-      with open(pdf_FileName,"w+b") as f:
+      with open(pdf_path,"w+b") as f:
           # 画像フォルダの中にあるPNGファイルを取得し配列に追加、バイナリ形式でファイルに書き込む
           f.write(img2pdf.convert([Image.open(fname).filename for fname in png_Folder]))
       
